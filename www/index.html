@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<!-- Designed and developed by Business Solution Apps team -->
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>RMap</title>
+			
+		<link rel="stylesheet" href="static/c.min.css" />
+		<link rel="stylesheet" href="static/jquery.mobile.icons.min.css" />
+		<link rel="stylesheet" href="static/jquery.mobile-1.4.5.min.css" />
+        
+		<script src="static/jquery-2.1.3.min.js">   </script>
+        <script src="static/jquery.mobile-1.4.5.min.js">   </script>
+		<script src="static/survey.js"></script>	
+	<script>
+	$(document).ready(function(){		
+		$('#cid').val('');
+	  	$('#user_id').val('');
+		$('#user_pass').val('');
+		
+		/*if (localStorage.cid!=undefined && localStorage.cid!=''){
+			$('#cid').val(localStorage.cid)
+		};
+	  	if (localStorage.user_id!=undefined && localStorage.user_id!=''){
+			$('#user_id').val(localStorage.user_id)
+		};*/
+		//--------------
+		
+		$("#wait_image_login").hide();
+		$("#loginButton").show();
+		
+		$("#wait_image_samity").hide();		
+		
+		//-----------------
+		first_page();
+		
+	});
+	
+	//------------------------------------- Unschedule Distributor combo -----------------------------	
+	$.mobile.document.on( "listviewcreate", "#samity_combo_id-menu", function( e ) {
+        var input,
+            listbox = $( "#samity_combo_id-listbox" ),
+            form = listbox.jqmData( "filter-form" ),
+            listview = $( e.target );
+        if ( !form ) {
+            input = $( "<input id='clientSearch' data-type='search'></input>" );
+            form = $( "<form></form>" ).append( input );
+            input.textinput();
+            $( "#samity_combo_id-listbox" )
+                .prepend( form )
+                .jqmData( "filter-form", form );
+        }
+        listview.filterable({ input: input });
+    })
+    .on( "pagebeforeshow pagehide", "#samity_combo_id-dialog", function( e ) {
+        var form = $( "#samity_combo_id-listbox" ).jqmData( "filter-form" ),
+            placeInDialog = ( e.type === "pagebeforeshow" ),
+            destination = placeInDialog ? $( e.target ).find( ".ui-content" ) : $( "#samity_combo_id-listbox" );
+        form
+            .find( "input" )
+            .textinput( "option", "inset", !placeInDialog )
+            .end()
+            .prependTo( destination );
+    });	
+	
+    </script>
+	
+	</head>
+    
+	
+    <body>
+	    <!--===================== pageSync ==================-->
+		<div data-theme="c" data-role="page" id="login">
+            <div data-theme="c" data-role="header" data-position="fixed">
+               <a  data-role="button" href="#pageHome" class="ui-btn-left ui-btn-icon-notext"><img src="menu.png"></a>
+                <h3>Authorization</h3>
+            </div>
+			
+            <div data-role="content">
+            	<div id="error_login" style="color:#C00"></div>                
+                    <form>	
+                    	<input type="text" name="cid" id="cid"  value="" placeholder="CID">					
+                        <input name="user_id" id="user_id"  value="" type="text" placeholder="User ID">
+                        <input type="text" name="user_pass" id="user_pass"  value="" placeholder="Password">
+                    </form>
+                    
+				<a data-role="button" id="loginButton" onClick="check_user();" >Sync</a>
+				<div align="center"><img id="wait_image_login" style="" width="50px;" src="loading.gif" alt=""></div>
+                                
+                <br><br><br><br><br><br><br><br><br><br>
+                
+                <a data-role="button" onClick="clear_autho();" >Logout</a>                
+                <br><br><br><br><br><br>                       
+            </div>
+            <!-- ==========footer====== -->	
+            <div data-theme="c" data-role="footer" data-position="fixed"></div>        
+        </div>
+		
+        <!-- =====================Home page=============== -->
+		<div data-theme="c" data-role="page" id="pageHome">
+			<div data-role="panel" id="routePanel" data-display="overlay" style="width:60%; background-color:#FFF">
+				<div align="center">
+                <img style="width:100%" src="logo_gp.png" alt="GP" />
+                <br>
+				</div>
+                
+				<br><br><br><br>
+                
+				<ul data-role="listview">                    
+                    <br><br>
+                    <div style="background:#008A8A; height:1px"></div>
+                    <li ><div ><a href="#login" ><img src="sync.png"></a></div></li> 
+                    <div style="background:#008A8A; height:1px"></div>
+                </ul>
+                
+				<div style="margin:100%;"></div>				
+			</div><!-- /panel -->
+			
+            <div data-theme="c" data-role="header" data-position="fixed" >			
+				<a  data-role="button" href="#routePanel" class="ui-btn-left ui-btn-icon-notext"><img src="menu.png"></a>
+                <a  data-role="button" onClick="exit();" class="ui-btn-right" style="padding:4px;"><img src="exit.png" style="height:25px; width:25px;"></a>
+                
+                <h3>Micro-Finance</h3>
+            </div>
+            
+            <div data-role="content">				
+				<div id="myerror" style="color:#C00;">				
+				</div>
+                
+                <div data-role="fieldcontain">
+                	<div class="ui-grid-a">
+						<div style="text-align:center;" >
+							<a onClick="addSamityList();" ><img src="collection.png"></a> <!--onClick="getSheduledRetailer();"-->
+						</div>						
+					</div>
+                    
+					<div class="ui-grid-a">
+						<div style="text-align:center;" >
+							<a onClick=""><img src="reports.png"></a>                            
+						</div>										
+					</div>                                 
+                </div>
+                 
+                </div>	
+                <div data-theme="c" data-role="footer" data-position="fixed"></div>			
+            </div>
+		
+        
+		<!--===================== Samity List==================-->
+		<div data-theme="c" data-role="page" id="pageSamity">
+            <div data-theme="c" data-role="header" data-position="fixed">
+                <a data-role="button" data-rel="back"  data-icon="arrow-l" data-iconpos="left" class="ui-btn-right">Back</a>
+                 <h3>Samity</h3>
+            </div>
+			
+            <div data-role="content" style="margin-top:0px; padding-top:0px;">
+            	
+                <div id="err_samity_next" style="color:#C00"></div>
+                <input id="samity_combo_id" data-type="search" placeholder="Search">
+                <ul id="samity_combo_id_lv" data-role="listview" data-filter="true" data-input="#samity_combo_id" data-inset="true"></ul>
+                
+                <br/><br/>
+                <div align="center"><img id="wait_image_samity" style="" width="50px;" src="loading.gif" alt=""></div>
+            	
+            </div><!--/cont-->
+			
+			<div data-theme="c" data-role="footer" data-position="fixed">
+			
+			</div>
+            
+		 </div><!--/page-->
+         
+         <!--  ==================== Member List / Collection Sheet ========-->
+		<div data-theme="c" data-role="page" id="pageMember">
+        		<div data-theme="c" data-role="header" data-position="fixed">
+                <a data-role="button" data-rel="back"  data-icon="arrow-l" data-iconpos="left" class="ui-btn-right">Back</a>
+                 <h3>Collection Sheet</h3>
+				</div>
+				
+                <div data-role="content" style="margin-top:0px; padding-top:0px;">
+					<div id="memberErrMsg" style="color:#FF0000;" onClick="setFocusPoint()"></div>
+					<input name="" id="focusMemID" value="" type="hidden">
+                    
+                    <div id="memberListDiv"></div>
+                    <br>
+					<input name="samID" id="samID" placeholder="" value="" type="hidden">
+                    <input name="latitude" id="latitude" placeholder="" value="" type="hidden">
+                    <input name="longitude" id="longitude" placeholder=""  value="" type="hidden">
+                    
+                    <a data-role="button" data-transition="slide" data-icon="arrow-r" data-iconpos="right" href="#pageSamity" class="ui-btn-hover-a">New Samity</a>
+                	<a data-role="button" data-transition="slide" data-icon="arrow-r" data-iconpos="right" href="#pageHome" class="ui-btn-hover-a">Home</a>
+                	<br><br><br><br><br><br>
+		    	</div>
+                
+		    <div data-theme="c" data-role="footer" data-position="fixed"></div>
+            
+		</div>
+     
+    <!--<script type="text/javascript" src="phonegap.js"></script>-->
+    
+    
+    </body>
+</html>
