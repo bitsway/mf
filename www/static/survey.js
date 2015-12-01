@@ -1,14 +1,10 @@
 
-
-//var apipath_base_photo_dm='http://e.businesssolutionapps.com/lscrmap/syncmobile3/dmpath?CID=LSCRM&HTTPPASS=e99business321cba'
-//var apipath_base_photo_dm='http://127.0.0.1:8000/lscmreporting/syncmobile3/dmpath?CID=LSCRM&HTTPPASS=e99business321cba'
-
-var submitFlag='0';
-
 //-------GET GEO LOCATION
 function getLocationInfo() { //location
-	navigator.geolocation.getCurrentPosition(onSuccess, onError);
+        var options = { enableHighAccuracy: false};	
+	navigator.geolocation.getCurrentPosition(onSuccess, onError, options);	
 }
+
 // onSuccess Geolocation
 function onSuccess(position) {
 	$("#latitude").val(position.coords.latitude);
@@ -36,7 +32,6 @@ function get_login() {
 	var url = "#login";
 	$.mobile.navigate(url);
 	}
-
 
 function setFocusPoint(){
 	var memID=$("#focusMemID").val();
@@ -282,6 +277,7 @@ function check_user() {
 //------------------------------ Samity List
 function addSamityList() {
 	$("#samity_combo_id").val('');
+	$("#wait_image_samity").hide();
 	
 	var samity_cmb_list=localStorage.samity_cmb_list;	
 	//---		
@@ -289,7 +285,8 @@ function addSamityList() {
 	samity_combo_ob.empty()
 	samity_combo_ob.append(samity_cmb_list);
 	
-	//-------	
+	//-------
+	localStorage.doubleSubmit='0'	
 	var url = "#pageSamity";
 	$.mobile.navigate(url);
 	
@@ -300,17 +297,26 @@ function addSamityList() {
 //==================Samity > Member List
 function memberList(samId) {						
 		$("#memberErrMsg").text("");
+		$("#err_samity_next").text("");
+		
+		
+		$("#wait_image_samity").show();
+		$("#samity_combo_id_lv").hide();
+		
 		var synccode=localStorage.synccode;
 		if (synccode==undefined || synccode=="" || synccode=="None"){
 			 synccode="0";
 			 }
+		
 		
 		//alert(localStorage.base_url+'sync_api/loanSavCollection?cid='+localStorage.cid+'&repid='+localStorage.user_id+'&samityid='+samId+'&synccode='+synccode);
 		$.ajax({
 		  url: localStorage.base_url+'sync_api/loanSavCollection?cid='+localStorage.cid+'&repid='+localStorage.user_id+'&samityid='+samId+'&synccode='+synccode,
 		  success: function(memResult) {			
 			if (memResult==''){
-				alert ('Check vaid CID Or Network connectivity');
+				$("#err_samity_next").text("'Check vaid CID Or Network connectivity")
+				$("#samity_combo_id_lv").show();
+				$("#wait_image_samity").hide();				
 			}else{	
 				//alert(memResult);			
 				
@@ -323,140 +329,159 @@ function memberList(samId) {
 				$('#memberListDiv').empty();
 				$('#memberListDiv').append(resultArray[1]).trigger('create');
 				
-				//var url = "#pageMember";      
-				//$(location).attr('href',url);
+				
+				localStorage.doubleSubmit='0'
 				
 				var url = "#pageMember";
 				$.mobile.navigate(url);
 				
+				$("#wait_image_samity").hide();
+				$("#samity_combo_id_lv").show();
+				
 				//getLocationInfo();
-				submitFlag='0';
+				
 				}			
 		  },
-		  error: function(memResult) {
-		    alert(errror_str);
+		  error: function(errror_str) {
+			$("#err_samity_next").text(errror_str)
+			$("#samity_combo_id_lv").show();
+			$("#wait_image_samity").hide();
 		  }
 		});
 }
 
-
 //========================== Final Submit
 function finalSubmit(memId) {		
-		var loanAccStr=$("input[id='"+memId+"loanId']").val();//$("#"+memId+"loanId").val();
-		var savAccStr=$("input[id='"+memId+"savId']").val();//$("#"+memId+"savId").val();
+		var submitMemId=memId.replace('.', '_');
+		$('#btn_submit'+submitMemId).hide();
 		
-		var loan_array=new Array();
-		var sav_array=new Array();
-		
-		loan_array=loanAccStr.split('_');
-		sav_array=savAccStr.split('_');
-		
-		var totalAmtShow=0
-		var submitStr='';
-		var loanStr='';
-		var savStr='';
-		
-		//---------- Loan
-		var loanAcc=''
-		var loanAmt=0			
-		var i=0;
-		while (i < loan_array.length){
-			loanAcc=loan_array[i];					
-			loanAmt=$("#L"+loanAcc).val();
+		if (localStorage.doubleSubmit=='1'){
+			$("#memberErrMsg").text("Please wait...");
+			$('#btn_submit'+submitMemId).show();
+			alert("Please wait...");			
+		}else{
+			localStorage.doubleSubmit='1'
 			
-			if (loanAmt==""){
-				loanAmt=0;
-			}else{
-					if (isNaN(loanAmt)){
-						loanAmt=0;
-					}
-				};
+			var loanAccStr=$("input[id='"+memId+"loanId']").val();//$("#"+memId+"loanId").val();
+			var savAccStr=$("input[id='"+memId+"savId']").val();//$("#"+memId+"savId").val();
 			
-			if (eval(loanAmt)>0){	
-				totalAmtShow=totalAmtShow+eval(loanAmt)
-				if (loanStr==''){
-					loanStr=loanAcc+'_'+loanAmt
+			var loan_array=new Array();
+			var sav_array=new Array();
+			
+			loan_array=loanAccStr.split('_');
+			sav_array=savAccStr.split('_');
+			
+			var totalAmtShow=0
+			var submitStr='';
+			var loanStr='';
+			var savStr='';
+			
+			//---------- Loan
+			var loanAcc=''
+			var loanAmt=0			
+			var i=0;
+			while (i < loan_array.length){
+				loanAcc=loan_array[i];					
+				loanAmt=$("#L"+loanAcc).val();
+				
+				if (loanAmt==""){
+					loanAmt=0;
 				}else{
-					loanStr=loanStr+','+loanAcc+'_'+loanAmt
-					}
-			}
-			i=i+1;
-		};
-		
-		//----------- Savings
-		var savAcc=''
-		var savAmt=0			
-		var j=0;
-		while (j < sav_array.length){
-			savAcc=sav_array[j];					
-			savAmt=$("#S"+savAcc).val();
-			
-			if (savAmt==""){
-				savAmt=0;
-			}else{
-				if (isNaN(savAmt)){
-					savAmt=0;
+						if (isNaN(loanAmt)){
+							loanAmt=0;
+						}
+					};
+				
+				if (eval(loanAmt)>0){	
+					totalAmtShow=totalAmtShow+eval(loanAmt)
+					if (loanStr==''){
+						loanStr=loanAcc+'_'+loanAmt
+					}else{
+						loanStr=loanStr+','+loanAcc+'_'+loanAmt
+						}
 				}
-				};
+				i=i+1;
+			};
 			
-			if (eval(savAmt)>0){	
-				totalAmtShow=totalAmtShow+eval(savAmt)
-				if (savStr==''){
-					savStr=savAcc+'_'+savAmt
+			//----------- Savings
+			var savAcc=''
+			var savAmt=0			
+			var j=0;
+			while (j < sav_array.length){
+				savAcc=sav_array[j];					
+				savAmt=$("#S"+savAcc).val();
+				
+				if (savAmt==""){
+					savAmt=0;
 				}else{
-					savStr=savStr+','+savAcc+'_'+savAmt
+					if (isNaN(savAmt)){
+						savAmt=0;
 					}
-			}
-			j=j+1;
-		};
-		
-		var memTag='confirmSubmit'+memId;		
-		var confirmStatus=$("input[name='"+memTag+"']:checked").val();
-		var confirmFlag=0
-		if (confirmStatus=='YES'){
-			confirmFlag=1;
-			}
-		
-		//var confirmFlag=$("input[id='confirmSubmit"+memId+"']").attr('checked') ? 1 : 0;
-		var totalAmount=$("input[id='totalAmount"+memId+"']").val();
-		totalAmount=eval(totalAmount);
-		
-		//alert(confirmFlag);
-		
-		if (totalAmtShow==0){
-			$("#memberErrMsg").text("");
-			alert("Required amount");
-		}else{			
-			if (totalAmtShow!=totalAmount){
+					};
+				
+				if (eval(savAmt)>0){	
+					totalAmtShow=totalAmtShow+eval(savAmt)
+					if (savStr==''){
+						savStr=savAcc+'_'+savAmt
+					}else{
+						savStr=savStr+','+savAcc+'_'+savAmt
+						}
+				}
+				j=j+1;
+			};
+			
+			var memTag='confirmSubmit'+memId;		
+			var confirmStatus=$("input[name='"+memTag+"']:checked").val();
+			var confirmFlag=0
+			if (confirmStatus=='YES'){
+				confirmFlag=1;
+				}
+			
+			//var confirmFlag=$("input[id='confirmSubmit"+memId+"']").attr('checked') ? 1 : 0;
+			var totalAmount=$("input[id='totalAmount"+memId+"']").val();
+			totalAmount=eval(totalAmount);
+			
+			//alert(confirmFlag);
+			
+			if (totalAmtShow==0){
+				localStorage.doubleSubmit='0'
 				$("#memberErrMsg").text("");
-				alert("Required valid Total Amount");
-			}else{
-				if (confirmFlag!=1){
+				$('#btn_submit'+submitMemId).show();				
+				alert("Required amount");
+			}else{			
+				if (totalAmtShow!=totalAmount){
+					localStorage.doubleSubmit='0'
 					$("#memberErrMsg").text("");
-					alert("Required checked confirmation");
+					$('#btn_submit'+submitMemId).show();
+					alert("Required valid Total Amount");
 				}else{
-					//---------
-					var samId=$("#samID").val();
-					submitStr=loanStr+'fdfd'+savStr;
+					if (confirmFlag!=1){
+						localStorage.doubleSubmit='0'
+						$("#memberErrMsg").text("");
+						$('#btn_submit'+submitMemId).show();
+						alert("Required checked confirmation");
+					}else{
+						//---------
+						var samId=$("#samID").val();
+						submitStr=loanStr+'fdfd'+savStr;
+							
+						var synccode=localStorage.synccode;
+						if (synccode==undefined || synccode=="" || synccode=="None"){
+							 synccode="0";
+							 }
 						
-					var synccode=localStorage.synccode;
-					if (synccode==undefined || synccode=="" || synccode=="None"){
-						 synccode="0";
-						 }
-					
-					var errorStr='Required Value';
-					var latitude=$("#latitude").val();
-					var longitude=$("#longitude").val();
-					
-					if (submitFlag=='0'){
-						submitFlag='1';
+						var errorStr='Required Value';
+						var latitude=$("#latitude").val();
+						var longitude=$("#longitude").val();
+						
 						//http://127.0.0.1:8000/mrepmobile/mf/dataSubmitMf?cid=MFDEMO&repid=101&samityid=1&memberid=1.04&totalAmount=120&mLatitude=&mLongitude=&data=4_100fdfd4_20&synccode=105906
 						//alert (apipath+'loanSavCollection?cid='+cidValue+'&repid='+repid+'&samityid='+samId+'&memberid='+memId+'&totalAmount='+totalAmtShow+'&mLatitude='+latitude+'&mLongitude='+longitude+'&data='+encodeURI(submitStr)+'&synccode='+synccode+'&btnSubmit=YES');
 						$.ajax({
 								 url: localStorage.base_url+'sync_api/loanSavCollection?cid='+localStorage.cid+'&repid='+localStorage.user_id+'&samityid='+samId+'&memberid='+memId+'&totalAmount='+totalAmtShow+'&mLatitude='+latitude+'&mLongitude='+longitude+'&data='+encodeURI(submitStr)+'&synccode='+synccode+'&btnSubmit=YES',
 								  success: function(result) {									 
 									if (result==''){
-										submitFlag='0';	
+										localStorage.doubleSubmit='0';
+										$('#btn_submit'+submitMemId).show();
 										alert ('Check Network connectivity');
 									}else{							 
 										var resultArray = result.split('rdrd');			
@@ -470,23 +495,24 @@ function finalSubmit(memId) {
 										
 										$("#focusMemID").val(resultArray[2]);
 										
+										localStorage.doubleSubmit='0';
 										var url = "#pageMember";      
 										$.mobile.navigate(url);										
-										submitFlag='0';
-																			
+										
 									}
 								  },
-								  error: function(result) {	
-									submitFlag='0';								
+								  error: function(result) {
+									localStorage.doubleSubmit='0';
+									$('#btn_submit'+submitMemId).show();							
 									alert(errror_str);
 								  }
 						});
-					};//else{alert("2nd")}
-				
-				//--------
+					
+					//--------
+					}
 				}
 			}
-		}
+	}
 }
 
 //============= Amount sum on blur
@@ -542,7 +568,80 @@ function sumTotal(memId){
 		$("span[id='"+memId+"AMT']").text(totalAmtShow);
 }
 
+function getReportList() {	
+	$("#error_report").html('');
+	$('#report_data_show').empty();
+	
+	var url = "#pageReport";
+	$.mobile.navigate(url);
+	}
 
+
+//------------------------------ Report
+function rpt_samity_wise_summary() {
+			
+		$("#error_report").html('');
+		$('#report_data_show').empty();
+		$('#wait_report').hide();
+		
+		var user_id=localStorage.user_id
+		
+		if (user_id=="" || user_id==undefined || user_id=="None"){
+			$("#error_report").html('Invalid authorization');
+		}else{
+			
+			$('#wait_report').show();
+			
+			var synccode=localStorage.synccode;
+			if (synccode==undefined || synccode=="" || synccode=="None"){
+				 synccode="0";
+				 }
+			
+			//alert(localStorage.base_url+'sync_api_report/getSamitySummaryReport?cid='+localStorage.cid+'&repid='+localStorage.user_id+'&synccode='+synccode)
+			
+			//====== 
+			$.ajax({
+				type: 'POST',
+				url: localStorage.base_url+'sync_api_report/getSamitySummaryReport?cid='+localStorage.cid+'&repid='+localStorage.user_id+'&synccode='+synccode,
+				success: function(result){
+						if (result==''){
+							$("#error_report").html('Sorry Network not available');												
+							$('#wait_report').hide();							
+						}else{
+							var resultRetArray = result.split('<rdrd>');
+							if (resultRetArray[0]=='FAILED'){
+								$("#error_report").html(resultArray[1]);
+								$('#wait_report').hide();								
+							}else if(resultRetArray[0]=='SUCCESS'){
+									
+									var resultStr = resultRetArray[1];								
+									
+									$('#report_data_show').empty();
+									$('#report_data_show').append(resultStr).trigger('create');
+									
+									//==========
+									$('#wait_report').hide();	
+									
+									//=====
+									var url = "#pageReport";
+									$.mobile.navigate(url);
+									
+								}else{
+									$("#error_report").html("Result Error");
+					 				$('#wait_report').hide();
+									}
+						};
+						
+					},error: function(result) {	  
+					  $("#error_report").html("Connectivity Error.Please Check Your Network Connection and Try Again");
+					  $('#wait_report').hide();				  
+				  }
+				  
+			  });//end ajax
+		  
+		};
+
+}
 
 
 

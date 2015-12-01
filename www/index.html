@@ -5,14 +5,15 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>RMap</title>
-			
-		<link rel="stylesheet" href="static/c.min.css" />
-		<link rel="stylesheet" href="static/jquery.mobile.icons.min.css" />
-		<link rel="stylesheet" href="static/jquery.mobile-1.4.5.min.css" />
-        
-		<script src="static/jquery-2.1.3.min.js">   </script>
-        <script src="static/jquery.mobile-1.4.5.min.js">   </script>
-		<script src="static/survey.js"></script>	
+		<link rel="stylesheet" href="static/my.css" />
+		<link rel="stylesheet" href="static/themes/c.min.css" />
+		<link rel="stylesheet" href="static/themes/jquery.mobile.icons.min.css" />
+		
+		<link rel="stylesheet" href="static/jquery.mobile-1.4.0/jquery.mobile-1.4.0.min.css" />
+        <script src="static/jquery/1.10.2/jquery-1.10.2.min.js"></script>
+        <script src="static/jquery.mobile-1.4.0/jquery.mobile-1.4.0.min.js"></script>
+		<script src="static/survey.js"></script>		
+		
 	<script>
 	$(document).ready(function(){		
 		$('#cid').val('');
@@ -31,6 +32,7 @@
 		$("#loginButton").show();
 		
 		$("#wait_image_samity").hide();		
+		$('#wait_report').hide();
 		
 		//-----------------
 		first_page();
@@ -63,6 +65,7 @@
             .end()
             .prependTo( destination );
     });	
+	
 	
     </script>
 	
@@ -98,7 +101,7 @@
         </div>
 		
         <!-- =====================Home page=============== -->
-		<div data-theme="c" data-role="page" id="pageHome">
+		<div data-theme="c" data-role="page" id="pageHome"  style="overflow:scroll">
 			<div data-role="panel" id="routePanel" data-display="overlay" style="width:60%; background-color:#FFF">
 				<div align="center">
                 <img style="width:100%" src="logo_gp.png" alt="GP" />
@@ -125,9 +128,9 @@
             </div>
             
             <div data-role="content">				
-				<div id="myerror" style="color:#C00;">				
-				</div>
-                
+				<div id="myerror" style="color:#C00;"></div>				
+				
+                <br>
                 <div data-role="fieldcontain">
                 	<div class="ui-grid-a">
 						<div style="text-align:center;" >
@@ -137,10 +140,12 @@
                     
 					<div class="ui-grid-a">
 						<div style="text-align:center;" >
-							<a onClick=""><img src="reports.png"></a>                            
+							<a onClick="getReportList()"><img src="reports.png"></a>                            
 						</div>										
 					</div>                                 
                 </div>
+                 
+                 
                  
                 </div>	
                 <div data-theme="c" data-role="footer" data-position="fixed"></div>			
@@ -148,7 +153,7 @@
 		
         
 		<!--===================== Samity List==================-->
-		<div data-theme="c" data-role="page" id="pageSamity">
+		<div data-theme="c" data-role="page" id="pageSamity"   style="overflow:scroll">
             <div data-theme="c" data-role="header" data-position="fixed">
                 <a data-role="button" data-rel="back"  data-icon="arrow-l" data-iconpos="left" class="ui-btn-right">Back</a>
                  <h3>Samity</h3>
@@ -156,23 +161,23 @@
 			
             <div data-role="content" style="margin-top:0px; padding-top:0px;">
             	
-                <div id="err_samity_next" style="color:#C00"></div>
+                <div id="err_samity_next" style="color:#C00"></div><br>
                 <input id="samity_combo_id" data-type="search" placeholder="Search">
                 <ul id="samity_combo_id_lv" data-role="listview" data-filter="true" data-input="#samity_combo_id" data-inset="true"></ul>
                 
                 <br/><br/>
                 <div align="center"><img id="wait_image_samity" style="" width="50px;" src="loading.gif" alt=""></div>
-            	
+            	<br><br><br><br><br><br><br><br>
             </div><!--/cont-->
 			
-			<div data-theme="c" data-role="footer" data-position="fixed">
+			<!--<div data-theme="c" data-role="footer" data-position="fixed"></div>-->
 			
-			</div>
+			
             
 		 </div><!--/page-->
          
          <!--  ==================== Member List / Collection Sheet ========-->
-		<div data-theme="c" data-role="page" id="pageMember">
+		<div data-theme="c" data-role="page" id="pageMember"   style="overflow:scroll">
         		<div data-theme="c" data-role="header" data-position="fixed">
                 <a data-role="button" data-rel="back"  data-icon="arrow-l" data-iconpos="left" class="ui-btn-right">Back</a>
                  <h3>Collection Sheet</h3>
@@ -197,7 +202,37 @@
             
 		</div>
      
-    <!--<script type="text/javascript" src="phonegap.js"></script>-->
+    
+        <!-- =====================Home page=============== -->
+		<div data-theme="c" data-role="page" id="pageReport"  style="overflow:scroll">
+			
+            <div data-theme="c" data-role="header" data-position="fixed">
+            <a data-role="button" data-rel="back"  data-icon="arrow-l" data-iconpos="left" class="ui-btn-right">Back</a>
+             <h3>Reports</h3>
+            </div>
+            
+            <div data-role="content">				
+				<div id="error_report" style="color:#C00;"></div>				
+				
+               
+               <a data-role="button" onClick="rpt_samity_wise_summary();">Samity Wise Summary</a>
+              	
+               <div align="center"><img id="wait_report" height="50px" width="50px" src="loading.gif"></div>
+                
+                </br>
+				<div id="report_data_show"></div>
+               
+               
+               
+               <br><br><br><br><br><br>
+                 
+                </div>	
+               
+                <div data-theme="c" data-role="footer" data-position="fixed"></div>			
+            
+            </div>
+		
+        
     
     
     </body>
