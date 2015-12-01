@@ -1,8 +1,7 @@
 
 //-------GET GEO LOCATION
 function getLocationInfo() { //location
-        var options = { enableHighAccuracy: false};	
-	navigator.geolocation.getCurrentPosition(onSuccess, onError, options);	
+	navigator.geolocation.getCurrentPosition(onSuccess, onError);
 }
 
 // onSuccess Geolocation
